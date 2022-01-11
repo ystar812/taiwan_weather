@@ -4,8 +4,8 @@
       <div id="map_box">
         <div id="map">
           <div class="icon_box" v-for="(item, key) in mapData" :key="key" @mouseover="hoverEnter(key)" @mouseleave="hoverOut(key)" :style="item.coordinate" :class="{current:item.current}">
-            <div class="icon">
-              <img src="./assets/img/c1.svg" alt="">
+            <div v-if="allCitiesData.datasetDescription" class="icon">
+              <img :src="require(`./assets/img/${allCitiesData.location[key].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
             </div>
             <div class="place">{{item.place}}</div>
           </div>
@@ -22,14 +22,14 @@
             <div class="top_box">
               <div class="text_box">
                 <div class="place">台北市</div>
-                <div class="temperature">16.2°</div>
+                <div class="temperature">16</div>
               </div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
             </div>
             <div class="bottom_box">
-              <div class="lable">多雲時陰陣雨</div>
+              <div class="lable" :class="{text_shrink}">多雲短暫陣雨</div>
               <div class="temperature">16 - 17°C</div>
             </div>
           </div>
@@ -150,10 +150,12 @@ export default {
   data(){
     return{
       mapData: map_data,
+      allCitiesData: [],
+      text_shrink: false
     }
   },
   created(){
-    
+    this.getAllCitiesData();
   },
   computed:{
     
@@ -162,11 +164,32 @@ export default {
     
   },
   methods:{
+    async getAllCitiesData(){
+      var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&elementName=Wx';
+      await this.$http.get(apiUrl).then((response) => {
+        // console.log(response.data.records);
+        this.allCitiesData = response.data.records;
+        this.sortMapData();
+        this.sortAllCitiesData();
+      });
+    },
     hoverEnter(n){
       this.mapData[n].current = true
     },
     hoverOut(n){
       this.mapData[n].current = false
+    },
+    sortArray1(x, y){
+      return x.place.localeCompare(y.place);
+    },
+    sortArray2(x, y){
+      return x.locationName.localeCompare(y.locationName);
+    },
+    sortMapData(){
+      this.mapData.sort(this.sortArray1);
+    },
+    sortAllCitiesData(){
+      this.allCitiesData.location.sort(this.sortArray2);
     },
   },
   components:{
@@ -204,12 +227,6 @@ $color_white: #ffffff
 @font-face
   font-family: 'GenSenMaruGothic'
   font-style: normal
-  font-weight: 400
-  src: url('./assets/fonts/GenSenMaruGothicTW-Regular.woff2') format('woff2')
-
-@font-face
-  font-family: 'GenSenMaruGothic'
-  font-style: normal
   font-weight: 500
   src: url('./assets/fonts/GenSenMaruGothicTW-Medium.woff2') format('woff2')
 
@@ -218,14 +235,6 @@ $color_white: #ffffff
   font-style: normal
   font-weight: 600
   src: url('./assets/fonts/GenSenMaruGothicTW-Bold.woff2') format('woff2')
-
-
-@font-face
-  font-family: 'GenSenMaruGothic'
-  font-style: normal
-  font-weight: 900
-  src: url('./assets/fonts/GenSenMaruGothicTW-Heavy.woff2') format('woff2')
-
 
 html
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0)
@@ -293,18 +302,20 @@ main
           text-align: center
           cursor: pointer
           @include laptop
-            width: 48px
+            width: 45px
           &.current
             .place
               color: $color_white
               background-color: $color_light_blue
           .icon
+            float: left
             width: 100%
-            margin-bottom: 0.2vmin
+            line-height: 1
             img
               display: inline-block
-              width: 70%
+              width: 80%
           .place
+            float: left
             width: 100%
             font-size: 14px
             padding: 2px 3px
@@ -347,12 +358,14 @@ main
             margin-right: 2vmin
             .place
               color: $color_navy_blue
-              font-size: 7.3vmin
+              font-size: 7vmin
               font-weight: 500
             .temperature
               color: $color_blue
-              font-size: 9.4vmin
+              font-size: 10vmin
               font-weight: 600
+              &:after
+                content: '°c'
           .icon
             float: left
             padding-top: 2vmin
@@ -372,6 +385,8 @@ main
             padding: 0 2vmin
             margin-right: 1.2vmin
             background: url(./assets/img/bg1.png) no-repeat center / 100% 100%
+            &.text_shrink
+              font-size: 2.2vmin
           .temperature
             float: left
             color: $color_blue
