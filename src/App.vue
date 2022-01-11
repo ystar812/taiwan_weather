@@ -3,43 +3,43 @@
     <main>
       <div id="map_box">
         <div id="map">
-          <div class="icon_box" v-for="(item, key) in mapData" :key="key" @mouseover="hoverEnter(key)" @mouseleave="hoverOut(key)" :style="item.coordinate" :class="{current:item.current}">
+          <div class="icon_box" v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)" @click="changeCounty(index)" :style="item.coordinate" :class="{active:item.active, current: currentCounty == index}">
             <div v-if="allCitiesData.datasetDescription" class="icon">
-              <img :src="require(`./assets/img/${allCitiesData.location[key].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
+              <img :src="require(`./assets/img/${allCitiesData.location[index].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
             </div>
             <div class="place">{{item.place}}</div>
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.012 688.923">
             <g id="taiwan_map">
-              <path v-for="(item, key) in mapData" :key="key" @mouseover="hoverEnter(key)" @mouseleave="hoverOut(key)" :id="item.apiId" :data-place="item.place" :d="item.pathD" :class="{current:item.current}"/>
+              <path v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)"  @click="changeCounty(index)" :id="item.apiId" :data-place="item.place" :d="item.pathD" :class="{active:item.active, current: currentCounty == index}"/>
             </g>
           </svg>
         </div>
       </div>
       <div id="weather_info">
         <div class="current">
-          <div class="info_box">
+          <div v-if="allCitiesData.datasetDescription" class="info_box">
             <div class="top_box">
               <div class="text_box">
-                <div class="place">台北市</div>
+                <div class="place">{{allCitiesData.location[currentCounty].locationName}}</div>
                 <div class="temperature">16</div>
               </div>
               <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
+                <img :src="require(`./assets/img/${allCitiesData.location[currentCounty].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
               </div>
             </div>
             <div class="bottom_box">
-              <div class="lable" :class="{text_shrink}">多雲短暫陣雨</div>
-              <div class="temperature">16 - 17°C</div>
+              <div class="lable" :class="{text_shrink}">{{allCitiesData.location[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
+              <div class="temperature">{{allCitiesData.location[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCitiesData.location[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
             </div>
           </div>
-          <div class="describe_box">
-            <div class="describe">
-              <div class="title">雲量偏多有局部短暫雨，天氣較涼，請注意添衣保暖，外出也請攜帶雨具備用</div>
+          <div class="description_box">
+            <div class="description">
+              <div class="title">{{ description[mapData[currentCounty].countyId].Title }}</div>
               <div class="con">
-                昨（6）日東北季風影響，天氣轉涼，雲量偏多，有局部短暫雨，迎風面山區雨勢較明顯且持續；在溫度方面，臺北站測得的高溫18.4度，低溫16.1度。<br>
-                今（7）日東北季風影響及南方雲系北移，天氣較涼，雲量偏多有局部短暫雨；預測平地氣溫約15-17度，溫度與昨日類似，請注意添衣保暖，外出也請攜帶雨具備用。<br>
-                沿海空曠地易有9至10級強陣風。
+                <div v-for="(item, index) in description[mapData[currentCounty].countyId].Content" :key="index">
+                  {{item}}
+                </div>
               </div>
             </div>
           </div>
@@ -49,11 +49,11 @@
             <div class="row_l">
               <div class="time">今日白天</div>
               <div class="temperature">16.2 - 17°C</div>
-              <div class="describe">稍有寒意</div>
+              <div class="description">稍有寒意</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="chance_of_rain">60%</div>
             </div>
@@ -62,11 +62,11 @@
             <div class="row_l">
               <div class="time">今晚明晨</div>
               <div class="temperature">16.2 - 17°C</div>
-              <div class="describe">稍有寒意</div>
+              <div class="description">稍有寒意</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="chance_of_rain">60%</div>
             </div>
@@ -75,11 +75,11 @@
             <div class="row_l">
               <div class="time">明日白天</div>
               <div class="temperature">16.2 - 17°C</div>
-              <div class="describe">稍有寒意</div>
+              <div class="description">稍有寒意</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="chance_of_rain">60%</div>
             </div>
@@ -90,49 +90,49 @@
             <div class="day_box">
               <div class="date">12/17(今天)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">12/18(六)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">1/9(日)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">1/10(一)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">1/11(二)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">1/12(三)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
             <div class="day_box">
               <div class="date">1/13(四)</div>
               <div class="icon">
-                <img src="./assets/img/c1.svg" alt="">
+                <img src="./assets/img/8.svg" alt="">
               </div>
               <div class="temperature">16 - 17°C</div>
             </div>
@@ -145,17 +145,23 @@
 
 <script>
 import map_data from './assets/data/mapData.js'
+import county from './assets/data/W50_Data.js'
 
 export default {
   data(){
     return{
       mapData: map_data,
       allCitiesData: [],
-      text_shrink: false
+      currentCounty: 18,
+      text_shrink: false,
+      description: county
     }
   },
   created(){
     this.getAllCitiesData();
+  },
+  mounted(){
+
   },
   computed:{
     
@@ -165,7 +171,7 @@ export default {
   },
   methods:{
     async getAllCitiesData(){
-      var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&elementName=Wx';
+      var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7';
       await this.$http.get(apiUrl).then((response) => {
         // console.log(response.data.records);
         this.allCitiesData = response.data.records;
@@ -174,10 +180,10 @@ export default {
       });
     },
     hoverEnter(n){
-      this.mapData[n].current = true
+      this.mapData[n].active = true
     },
     hoverOut(n){
-      this.mapData[n].current = false
+      this.mapData[n].active = false
     },
     sortArray1(x, y){
       return x.place.localeCompare(y.place);
@@ -191,6 +197,9 @@ export default {
     sortAllCitiesData(){
       this.allCitiesData.location.sort(this.sortArray2);
     },
+    changeCounty(v){
+      this.currentCounty = v;
+    }
   },
   components:{
 
@@ -301,12 +310,11 @@ main
           width: 56px
           text-align: center
           cursor: pointer
+          transition: transform .2s
           @include laptop
             width: 45px
-          &.current
-            .place
-              color: $color_white
-              background-color: $color_light_blue
+          &.active, &.current
+            transform: scale(1.11)
           .icon
             float: left
             width: 100%
@@ -334,7 +342,7 @@ main
           opacity: 0.37
           cursor: pointer
           transition: opacity .3s
-          &.current
+          &.active, &.current
             opacity: 1
   #weather_info
     flex: 0 0 60%
@@ -396,12 +404,14 @@ main
             font-weight: 600
             padding: 0 2vmin
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
-      .describe_box
+            &:after
+              content: '°C'
+      .description_box
         float: left
         width: 100%
         padding: 4vmin
         background: url(./assets/img/bg3.png) no-repeat center / 100% 100%
-        .describe
+        .description
           float: left
           width: 100%
           height: 27vmin
@@ -454,7 +464,7 @@ main
           .temperature
             font-size: 2vmin
             margin-bottom: 0.5vmin
-          .describe
+          .description
             font-size: 2vmin
             font-weight: 500
         .row_r
