@@ -4,8 +4,8 @@
       <div id="map_box">
         <div id="map">
           <div class="icon_box" v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)" @click="changeCounty(index)" :style="item.coordinate" :class="{active:item.active, current: currentCounty == index}">
-            <div v-if="allCitiesData.datasetDescription" class="icon">
-              <img :src="require(`./assets/img/${allCitiesData.location[index].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
+            <div v-if="allCounties" class="icon">
+              <img :src="require(`./assets/img/${allCounties[index].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
             </div>
             <div class="place">{{item.place}}</div>
           </div>
@@ -18,23 +18,23 @@
       </div>
       <div id="weather_info">
         <div class="current">
-          <div v-if="allCitiesData.datasetDescription" class="info_box">
+          <div v-if="allCounties" class="info_box">
             <div class="top_box">
               <div class="text_box">
-                <div class="place">{{allCitiesData.location[currentCounty].locationName}}</div>
-                <div class="temperature">16</div>
+                <div class="place">{{allCounties[currentCounty].locationName}}</div>
+                <div class="temperature">{{currentTemperature}}</div>
               </div>
               <div class="icon">
-                <img :src="require(`./assets/img/${allCitiesData.location[currentCounty].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
+                <img :src="require(`./assets/img/${allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
               </div>
             </div>
             <div class="bottom_box">
-              <div class="lable" :class="{text_shrink}">{{allCitiesData.location[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
-              <div class="temperature">{{allCitiesData.location[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCitiesData.location[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
+              <div class="lable" :class="{text_shrink}">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
+              <div class="temperature">{{allTemperature[0]}} - {{allTemperature[allTemperature.length-1]}}</div>
             </div>
           </div>
           <div class="description_box">
-            <div class="description">
+            <div v-if="description" class="description">
               <div class="title">{{ description[mapData[currentCounty].countyId].Title }}</div>
               <div class="con">
                 <div v-for="(item, index) in description[mapData[currentCounty].countyId].Content" :key="index">
@@ -44,44 +44,44 @@
             </div>
           </div>
         </div>
-        <div class="these_two_days">
+        <div v-if="allCounties" class="these_two_days">
           <div class="row">
             <div class="row_l">
-              <div class="time">今日白天</div>
-              <div class="temperature">16.2 - 17°C</div>
-              <div class="description">稍有寒意</div>
+              <div class="time">{{timeLabel[0]}}</div>
+              <div class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
+              <div class="description">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
+                <img :src="require(`./assets/img/${allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
               </div>
-              <div class="chance_of_rain">60%</div>
+              <div class="chance_of_rain">{{allCounties[currentCounty].weatherElement[1].time[0].parameter.parameterName}}%</div>
             </div>
           </div>
           <div class="row">
             <div class="row_l">
-              <div class="time">今晚明晨</div>
-              <div class="temperature">16.2 - 17°C</div>
-              <div class="description">稍有寒意</div>
+              <div class="time">{{timeLabel[1]}}</div>
+              <div class="temperature">{{allCounties[currentCounty].weatherElement[2].time[1].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[1].parameter.parameterName}}</div>
+              <div class="description">{{allCounties[currentCounty].weatherElement[0].time[1].parameter.parameterName}}</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
+                <img :src="require(`./assets/img/${allCounties[currentCounty].weatherElement[0].time[1].parameter.parameterValue}.svg`)" alt="">
               </div>
-              <div class="chance_of_rain">60%</div>
+              <div class="chance_of_rain">{{allCounties[currentCounty].weatherElement[1].time[1].parameter.parameterName}}%</div>
             </div>
           </div>
           <div class="row">
             <div class="row_l">
-              <div class="time">明日白天</div>
-              <div class="temperature">16.2 - 17°C</div>
-              <div class="description">稍有寒意</div>
+              <div class="time">{{timeLabel[2]}}</div>
+              <div class="temperature">{{allCounties[currentCounty].weatherElement[2].time[2].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[2].parameter.parameterName}}</div>
+              <div class="description">{{allCounties[currentCounty].weatherElement[0].time[2].parameter.parameterName}}</div>
             </div>
             <div class="row_r">
               <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
+                <img :src="require(`./assets/img/${allCounties[currentCounty].weatherElement[0].time[2].parameter.parameterValue}.svg`)" alt="">
               </div>
-              <div class="chance_of_rain">60%</div>
+              <div class="chance_of_rain">{{allCounties[currentCounty].weatherElement[1].time[2].parameter.parameterName}}%</div>
             </div>
           </div>
         </div>
@@ -145,20 +145,26 @@
 
 <script>
 import map_data from './assets/data/mapData.js'
-import county from './assets/data/W50_Data.js'
+import W50_County from 'countyData';
 
 export default {
   data(){
     return{
       mapData: map_data,
-      allCitiesData: [],
+      allCounties: '',
+      dataTime: '',
+      countyTheseTwoDays: '',
+      allTemperature: '',
+      currentTemperature: '',
       currentCounty: 18,
       text_shrink: false,
-      description: county
+      description: W50_County,
+      timeLabel: ''
     }
   },
-  created(){
-    this.getAllCitiesData();
+  async created(){
+    await this.getAllCounties();
+    this.getCounty();
   },
   mounted(){
 
@@ -170,13 +176,31 @@ export default {
     
   },
   methods:{
-    async getAllCitiesData(){
+    async getAllCounties(){
       var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7';
       await this.$http.get(apiUrl).then((response) => {
         // console.log(response.data.records);
-        this.allCitiesData = response.data.records;
+        this.allCounties = response.data.records.location;
         this.sortMapData();
-        this.sortAllCitiesData();
+        this.sortAllCounties();
+        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[0] == this.allCounties[0].weatherElement[0].time[1].endTime.split(' ')[0]) {
+          this.timeLabel = ['今晚明晨','明日白天','明日晚上']
+        }else{
+          this.timeLabel = ['今日白天','今晚明晨','明日白天']
+        }
+        this.dataTime = this.allCounties[0].weatherElement[0].time[0].startTime.replace(' ','T').replace(/:/g,'%3A');
+      });
+    },
+    getCountyTheseTwoDays(id,time){
+      return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-${id}?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&elementName=T&dataTime=${time}`);
+    },
+    getCounty(){
+      this.$http.all([this.getCountyTheseTwoDays(this.mapData[this.currentCounty].apiId,this.dataTime)]).then((response) => {
+        // console.log(response);
+        this.countyTheseTwoDays = response[0].data.records.locations[0].location;
+        this.allTemperature = this.countyTheseTwoDays.map(el=>Number(el.weatherElement[0].time[0].elementValue[0].value)).sort(this.sortArray3);
+        let sumTemperature = this.allTemperature.reduce((a,b)=>a+b);
+        this.currentTemperature = Math.round(sumTemperature / this.countyTheseTwoDays.length);
       });
     },
     hoverEnter(n){
@@ -191,14 +215,18 @@ export default {
     sortArray2(x, y){
       return x.locationName.localeCompare(y.locationName);
     },
+    sortArray3(x, y){
+      return x-y;
+    },
     sortMapData(){
       this.mapData.sort(this.sortArray1);
     },
-    sortAllCitiesData(){
-      this.allCitiesData.location.sort(this.sortArray2);
+    sortAllCounties(){
+      this.allCounties.sort(this.sortArray2);
     },
     changeCounty(v){
       this.currentCounty = v;
+      this.getCounty();
     }
   },
   components:{
@@ -363,7 +391,7 @@ main
           width: 100%
           .text_box
             float: left
-            margin-right: 2vmin
+            margin-right: 3vmin
             .place
               color: $color_navy_blue
               font-size: 7vmin
@@ -378,14 +406,14 @@ main
             float: left
             padding-top: 2vmin
             img
-              width: 16vmin
+              width: 18vmin
         .bottom_box
           float: left
           width: 100%
           .lable
             float: left
             color: $color_white
-            min-width: 24vmin
+            min-width: 23.5vmin
             height: 6vmin
             font-size: 2.8vmin
             line-height: 6vmin
@@ -398,11 +426,12 @@ main
           .temperature
             float: left
             color: $color_blue
+            min-width: 16.8vmin
             height: 6vmin
             font-size: 2.8vmin
             line-height: 6vmin
             font-weight: 600
-            padding: 0 2vmin
+            text-align: center
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
             &:after
               content: '°C'
@@ -417,13 +446,13 @@ main
           height: 27vmin
           overflow: auto
           font-size: 2vmin
-          line-height: 1.4
+          line-height: 1.45
           &::-webkit-scrollbar
-            width: 1vmin
+            width: 7px
           &::-webkit-scrollbar-track
             background: transparent
           &::-webkit-scrollbar-thumb
-            border-radius: 6px
+            border-radius: 7px
             background: rgba(0,128,162,0.3)
           &::-webkit-scrollbar-thumb:hover
             background: rgba(0,128,162,0.2)
@@ -464,6 +493,8 @@ main
           .temperature
             font-size: 2vmin
             margin-bottom: 0.5vmin
+            &:after
+              content: '°C'
           .description
             font-size: 2vmin
             font-weight: 500
@@ -472,13 +503,13 @@ main
           width: 50%
           .icon
             float: left
-            width: 48%
+            width: 52%
             padding-top: 0.6vmin
             img
               width: 100%
           .chance_of_rain
             float: left
-            width: 50%
+            width: 46%
             height: 10vmin
             color: $color_blue
             font-size: 1.8vmin
@@ -520,5 +551,7 @@ main
               width: 45%
           .temperature
             font-size: 1.8vmin
+            &:after
+              content: '°C'
 
 </style>
