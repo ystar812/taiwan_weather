@@ -30,11 +30,11 @@
             </div>
             <div class="bottom_box">
               <div class="lable" :class="{text_shrink}">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
-              <div class="temperature">{{allTemperature[0]}} - {{allTemperature[allTemperature.length-1]}}</div>
+              <div class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
             </div>
           </div>
           <div class="description_box">
-            <div v-if="description" class="description">
+            <div v-if="description" class="description" ref="des">
               <div class="title">{{ description[mapData[currentCounty].countyId].Title }}</div>
               <div class="con">
                 <div v-for="(item, index) in description[mapData[currentCounty].countyId].Content" :key="index">
@@ -152,9 +152,6 @@ export default {
     return{
       mapData: map_data,
       allCounties: '',
-      dataTime: '',
-      countyTheseTwoDays: '',
-      allTemperature: '',
       currentTemperature: '',
       currentCounty: 18,
       text_shrink: false,
@@ -177,30 +174,30 @@ export default {
   },
   methods:{
     async getAllCounties(){
+      // 中央氣象局API 預報(/v1/rest/datastore/F-C0032-001 一般天氣預報-今明 36 小時天氣預報)
       var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7';
       await this.$http.get(apiUrl).then((response) => {
         // console.log(response.data.records);
         this.allCounties = response.data.records.location;
         this.sortMapData();
         this.sortAllCounties();
-        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[0] == this.allCounties[0].weatherElement[0].time[1].endTime.split(' ')[0]) {
-          this.timeLabel = ['今晚明晨','明日白天','明日晚上']
+        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '00:00:00') {
+          this.timeLabel = ['今日凌晨','今日白天','今日晚上']
+        }else if(this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '06:00:00'){
+          this.timeLabel = ['今日白天','今晚明晨','明日白天']
         }else{
           this.timeLabel = ['今日白天','今晚明晨','明日白天']
         }
-        this.dataTime = this.allCounties[0].weatherElement[0].time[0].startTime.replace(' ','T').replace(/:/g,'%3A');
       });
     },
-    getCountyTheseTwoDays(id,time){
-      return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-${id}?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&elementName=T&dataTime=${time}`);
+    getCurrentWeatherReport(county){
+      // 中央氣象局API 觀測(/v1/rest/datastore/O-A0003-001 局屬氣象站-現在天氣觀測報告)
+      return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&locationName=${county}&elementName=TEMP&parameterName=CITY`);
     },
-    getCounty(){
-      this.$http.all([this.getCountyTheseTwoDays(this.mapData[this.currentCounty].apiId,this.dataTime)]).then((response) => {
-        // console.log(response);
-        this.countyTheseTwoDays = response[0].data.records.locations[0].location;
-        this.allTemperature = this.countyTheseTwoDays.map(el=>Number(el.weatherElement[0].time[0].elementValue[0].value)).sort(this.sortArray3);
-        let sumTemperature = this.allTemperature.reduce((a,b)=>a+b);
-        this.currentTemperature = Math.round(sumTemperature / this.countyTheseTwoDays.length);
+    async getCounty(){
+      await this.$http.all([this.getCurrentWeatherReport(this.mapData[this.currentCounty].observatory)]).then((response) => {
+        console.log(response[0].data.records.location[0]);
+        this.currentTemperature = Math.floor(response[0].data.records.location[0].weatherElement[0].elementValue);
       });
     },
     hoverEnter(n){
@@ -227,6 +224,7 @@ export default {
     changeCounty(v){
       this.currentCounty = v;
       this.getCounty();
+      this.$refs.des.scroll(0, 0);
     }
   },
   components:{
