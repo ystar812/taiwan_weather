@@ -11,7 +11,7 @@
           </div>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.012 688.923">
             <g id="taiwan_map">
-              <path v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)"  @click="changeCounty(index)" :id="item.apiId" :data-place="item.place" :d="item.pathD" :class="{active:item.active, current: currentCounty == index}"/>
+              <path v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)"  @click="changeCounty(index)" :data-place="item.place" :d="item.pathD" :class="{active:item.active, current: currentCounty == index}"/>
             </g>
           </svg>
         </div>
@@ -86,55 +86,14 @@
           </div>
         </div>
         <div class="a_week_box">
-          <div class="a_week">
-            <div class="day_box">
-              <div class="date">12/17(今天)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
+          <div v-if="aWeekWeather" class="a_week">
+            <div class="day_box" v-for="(item, index) in aWeekWeather[0].time" :key="index">
+              <div class="date">{{item.startTime.split(' ')[0].split('-')[1]}}/{{item.startTime.split(' ')[0].split('-')[2]}}</div>
+              <div  class="icon">
+                <img v-if="item.elementValue[1].value.split('')[0] == '0'" :src="require(`./assets/img/${item.elementValue[1].value.split('')[1]}.svg`)" alt="">
+                <img v-else :src="require(`./assets/img/${item.elementValue[1].value}.svg`)" alt="">
               </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">12/18(六)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">1/9(日)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">1/10(一)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">1/11(二)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">1/12(三)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
-            </div>
-            <div class="day_box">
-              <div class="date">1/13(四)</div>
-              <div class="icon">
-                <img src="./assets/img/8.svg" alt="">
-              </div>
-              <div class="temperature">16 - 17°C</div>
+              <div class="temperature">{{aWeekWeather[1].time[index].elementValue[0].value}} - {{aWeekWeather[2].time[index].elementValue[0].value}}</div>
             </div>
           </div>
         </div>
@@ -152,8 +111,9 @@ export default {
     return{
       mapData: map_data,
       allCounties: '',
-      currentTemperature: '',
       currentCounty: 18,
+      currentTemperature: '',
+      aWeekWeather: '',
       text_shrink: false,
       description: W50_County,
       timeLabel: ''
@@ -167,14 +127,14 @@ export default {
 
   },
   computed:{
-    
+
   },
   watch:{
     
   },
   methods:{
     async getAllCounties(){
-      // 中央氣象局API 預報(/v1/rest/datastore/F-C0032-001 一般天氣預報-今明 36 小時天氣預報)
+      // 中央氣象局API 預報-一般天氣預報(/v1/rest/datastore/F-C0032-001 一般天氣預報-今明 36 小時天氣預報)
       var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7';
       await this.$http.get(apiUrl).then((response) => {
         // console.log(response.data.records);
@@ -190,14 +150,19 @@ export default {
         }
       });
     },
-    getCurrentWeatherReport(county){
-      // 中央氣象局API 觀測(/v1/rest/datastore/O-A0003-001 局屬氣象站-現在天氣觀測報告)
+    getCurrentWeather(county){
+      // 中央氣象局API 觀測-現在天氣觀測報告(/v1/rest/datastore/O-A0003-001 局屬氣象站-現在天氣觀測報告)
       return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&locationName=${county}&elementName=TEMP&parameterName=CITY`);
     },
-    async getCounty(){
-      await this.$http.all([this.getCurrentWeatherReport(this.mapData[this.currentCounty].observatory)]).then((response) => {
-        console.log(response[0].data.records.location[0]);
+    getAweekWeather(id,town){
+      // 中央氣象局API 預報-1週天氣預報(/v1/rest/datastore/F-D0047-xxx)
+      return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-${id}?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&locationName=${town}&elementName=Wx,MinT,MaxT`);
+    },
+    getCounty(){
+      this.$http.all([this.getCurrentWeather(this.mapData[this.currentCounty].observatory),this.getAweekWeather(this.mapData[this.currentCounty].apiId,this.mapData[this.currentCounty].township)]).then((response) => {
+        // console.log(response[0].data.records.location[0]);
         this.currentTemperature = Math.floor(response[0].data.records.location[0].weatherElement[0].elementValue);
+        this.aWeekWeather = response[1].data.records.locations[0].location[0].weatherElement;
       });
     },
     hoverEnter(n){
@@ -306,8 +271,6 @@ a
     behavior: expression(this.onFocus=this.blur())
   &:link,  &:active,  &:visited,  &:hover
     text-decoration: none
-
-
 
 main
   display: flex
@@ -539,14 +502,21 @@ main
           *
             float: left
             width: 100%
+          &:nth-child(even)
+            display: none
+          &:first-child
+            .date
+              &:after
+                content: ' (今)'
+                font-size: 13px
           .date
-            font-size: 1.9vmin
+            font-size: 2vmin
           .icon
             margin: 1vmin 0
             img
               display: inline-block
               float: none
-              width: 45%
+              width: 48%
           .temperature
             font-size: 1.8vmin
             &:after
