@@ -3,7 +3,7 @@
     <main>
       <div id="map_box">
         <div id="map">
-          <div class="icon_box" v-for="(item, index) in mapData" :key="index" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)" @click="changeCounty(index)" :style="item.coordinate" :class="{active:item.active, current: currentCounty == index}">
+          <div class="icon_box" v-for="(item, index) in mapData" :key="index" :id="`c${item.countyId}`" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)" @click="changeCounty(index)" :style="item.coordinate" :class="{active:item.active, current: currentCounty == index}">
             <div v-if="allCounties" class="icon">
               <img :src="require(`./assets/img/${allCounties[index].weatherElement[0].time[0].parameter.parameterValue}.svg`)" alt="">
             </div>
@@ -30,7 +30,9 @@
             </div>
             <div class="bottom_box">
               <div class="lable" :class="{text_shrink}">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
-              <div class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
+              <div v-if="Number(currentTemperature) > Number(allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName)" class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{currentTemperature}}</div>
+              <div v-else-if="Number(currentTemperature) < Number(allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName)" class="temperature">{{currentTemperature}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
+              <div v-else class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
             </div>
           </div>
           <div class="description_box">
@@ -87,13 +89,13 @@
         </div>
         <div class="a_week_box">
           <div v-if="aWeekWeather" class="a_week">
-            <div class="day_box" v-for="(item, index) in aWeekWeather[0].time" :key="index">
+            <div class="day_box" v-for="(item, index) in aWeekWx" :key="index">
               <div class="date">{{item.startTime.split(' ')[0].split('-')[1]}}/{{item.startTime.split(' ')[0].split('-')[2]}}</div>
               <div  class="icon">
                 <img v-if="item.elementValue[1].value.split('')[0] == '0'" :src="require(`./assets/img/${item.elementValue[1].value.split('')[1]}.svg`)" alt="">
                 <img v-else :src="require(`./assets/img/${item.elementValue[1].value}.svg`)" alt="">
               </div>
-              <div class="temperature">{{aWeekWeather[1].time[index].elementValue[0].value}} - {{aWeekWeather[2].time[index].elementValue[0].value}}</div>
+              <div class="temperature">{{aWeekMinT[index].elementValue[0].value}} - {{aWeekMaxT[index].elementValue[0].value}}</div>
             </div>
           </div>
         </div>
@@ -127,7 +129,42 @@ export default {
 
   },
   computed:{
-
+    aWeekWx(){
+      if (this.aWeekWeather) {
+        return this.aWeekWeather[0].time.filter(item =>{
+          return item.startTime.split(' ')[1] == '06:00:00'
+        })
+      }else{
+        return []
+      }
+    },
+    aWeekMinT(){
+      if (this.aWeekWeather) {
+        return this.aWeekWeather[1].time.filter(item =>{
+          return item.startTime.split(' ')[1] == '06:00:00'
+        })
+        // let newMinT = this.aWeekWeather[1].time.filter(item =>{
+        //   return item.startTime.split(' ')[1] == '06:00:00'
+        // });
+        // if(newMinT.length > 7){
+        //   newMinT.pop();
+        //   return newMinT;
+        // }else{
+        //   return newMinT;
+        // }
+      }else{
+        return []
+      }
+    },
+    aWeekMaxT(){
+      if (this.aWeekWeather) {
+        return this.aWeekWeather[2].time.filter(item =>{
+          return item.startTime.split(' ')[1] == '06:00:00'
+        })
+      }else{
+        return []
+      }
+    }
   },
   watch:{
     
@@ -141,10 +178,8 @@ export default {
         this.allCounties = response.data.records.location;
         this.sortMapData();
         this.sortAllCounties();
-        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '00:00:00') {
-          this.timeLabel = ['今日凌晨','今日白天','今日晚上']
-        }else if(this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '06:00:00'){
-          this.timeLabel = ['今日白天','今晚明晨','明日白天']
+        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '06:00:00') {
+          this.timeLabel = ['今晚明晨','明日白天','明日晚上']
         }else{
           this.timeLabel = ['今日白天','今晚明晨','明日白天']
         }
@@ -284,43 +319,107 @@ main
     @include mobile
       flex: 0 0 100%
       height: auto
-      padding: 10vmin
+      padding: 11.5vw 15vw 11.5vw 8vw
     #map
       position: relative
       height: 80%
-      margin-top: 10%
+      margin: 10% 0 0 0
       @include mobile
         width: 100%
         height: auto
       .icon_box
-          position: absolute
-          top: 60%
-          left: 10%
-          width: 56px
-          text-align: center
-          cursor: pointer
-          transition: transform .2s
+        position: absolute
+        width: 56px
+        text-align: center
+        cursor: pointer
+        transition: transform .2s
+        @include laptop
+          width: 45px
+        &.active, &.current
+          transform: scale(1.11)
+        @include phone
+          &#c09020
+            top: -12% !important
+            left: 8% !important
+          &#c09020
+            top: 20% !important
+            left: -3% !important
+          &#c10016
+            top: 51% !important
+            left: -5% !important
+          &#c10002
+            top: 13% !important
+            left: 98% !important
+          &#c10017
+            top: -8% !important
+            left: 100% !important
+          &#c63
+            top: -16% !important
+            left: 86% !important
+          &#c65
+            top: -12% !important
+            left: 70% !important
+          &#c68
+            top: -8% !important
+            left: 55% !important
+          &#c10018
+            top: -2% !important
+            left: 41% !important
+          &#c10005
+            top: 11% !important
+            left: 41% !important
+          &#c66
+            top: 16% !important
+            left: 27% !important
+          &#c10007
+            top: 30% !important
+            left: 28% !important
+          &#c10008
+            top: 36% !important
+            left: 59% !important
+          &#c10009
+            top: 35% !important
+            left: 13% !important
+          &#c10010
+            top: 49% !important
+            left: 17% !important
+          &#c10020
+            top: 51% !important
+            left: 46% !important
+          &#c67
+            top: 64% !important
+            left: 19% !important
+          &#c64
+            top: 78% !important
+            left: 26% !important
+          &#c10013
+            top: 89% !important
+            left: 43% !important
+          &#c10014
+            top: 72% !important
+            left: 73% !important
+          &#c10015
+            top: 39% !important
+            left: 90% !important
+        .icon
+          float: left
+          width: 100%
+          line-height: 1
+          img
+            display: inline-block
+            width: 80%
+        .place
+          float: left
+          width: 100%
+          font-size: 14px
+          padding: 2px 0 0 0
+          border-radius: 14px
+          background-color: $color_white
+          transition: .2s
           @include laptop
-            width: 45px
-          &.active, &.current
-            transform: scale(1.11)
-          .icon
-            float: left
-            width: 100%
-            line-height: 1
-            img
-              display: inline-block
-              width: 80%
-          .place
-            float: left
-            width: 100%
-            font-size: 14px
-            padding: 2px 3px
-            border-radius: 3vmin
-            background-color: $color_white
-            transition: .2s
-            @include laptop
-              font-size: 12px
+            font-size: 12px
+          @include mobile
+            font-size: 11px
       svg
         height: 100%
         @include mobile
@@ -338,6 +437,7 @@ main
     padding: 5vmin 6vmin
     @include mobile
       flex: 0 0 100%
+      padding: 0 6vmin 6vmin 6vmin
     .current
       float: left
       width: 52%
@@ -346,7 +446,9 @@ main
       .info_box
         float: left
         width: 100%
-        margin: 0 0 2.1vmin 6vmin
+        padding: 0 0 2.1vmin 6vmin
+        @include mobile
+          padding: 0 0 4vmin 7vmin
         .top_box
           float: left
           width: 100%
@@ -357,17 +459,25 @@ main
               color: $color_navy_blue
               font-size: 7vmin
               font-weight: 500
+              @include mobile
+                font-size: 11.7vmin
             .temperature
               color: $color_blue
               font-size: 10vmin
               font-weight: 600
               &:after
                 content: '°c'
+              @include mobile
+                font-size: 17vmin
           .icon
             float: left
             padding-top: 2vmin
+            @include mobile
+              padding-top: 1vmin
             img
               width: 18vmin
+              @include mobile
+                width: 32vmin
         .bottom_box
           float: left
           width: 100%
@@ -384,6 +494,12 @@ main
             background: url(./assets/img/bg1.png) no-repeat center / 100% 100%
             &.text_shrink
               font-size: 2.2vmin
+            @include mobile
+              font-size: 5.6vmin
+              min-width: 38vmin
+              height: 10vmin
+              line-height: 11vmin
+              margin-right: 2vmin
           .temperature
             float: left
             color: $color_blue
@@ -396,11 +512,18 @@ main
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
             &:after
               content: '°C'
+            @include mobile
+              font-size: 5vmin
+              min-width: 33vmin
+              height: 10vmin
+              line-height: 11vmin
       .description_box
         float: left
         width: 100%
-        padding: 4vmin
+        padding: 4vmin 3vmin 4vmin 4vmin
         background: url(./assets/img/bg3.png) no-repeat center / 100% 100%
+        @include mobile
+          padding: 7vmin 6vmin 7vmin 7vmin
         .description
           float: left
           width: 100%
@@ -408,6 +531,8 @@ main
           overflow: auto
           font-size: 2vmin
           line-height: 1.45
+          text-align: justify
+          padding-right: 12px
           &::-webkit-scrollbar
             width: 7px
           &::-webkit-scrollbar-track
@@ -420,10 +545,15 @@ main
           @include mobile
             height: auto
             overflow: visible
+            font-size: 4vmin
+            text-align: left
+            padding-right: 0
           .title
             color: $color_navy_blue
             font-size: 2.1vmin
             margin-bottom: 1vmin
+            @include mobile
+              font-size: 4.2vmin
     .these_two_days
       float: left
       width: 36%
@@ -432,7 +562,8 @@ main
       background: url(./assets/img/bg3.png) no-repeat center / 100% 100%
       @include mobile
         width: 100%
-        margin: 6vmin 0 0 0
+        padding: 8vmin 8vmin 6vmin 8vmin
+        margin: 4vmin 0 0 0
       .row
         float: left
         width: 100%
@@ -444,6 +575,9 @@ main
           padding-bottom: 0
           margin-bottom: 0
           border: none
+        @include mobile
+          padding-bottom: 3vmin
+          margin-bottom: 5vmin
         .row_l
           float: left
           width: 50%
@@ -451,14 +585,22 @@ main
             color: $color_navy_blue
             font-size: 2.7vmin
             margin-bottom: 0.06vmin
+            @include mobile
+              font-size: 5vmin
+              margin-bottom: 0.5vmin
           .temperature
             font-size: 2vmin
             margin-bottom: 0.5vmin
             &:after
               content: '°C'
+            @include mobile
+              font-size: 4.2vmin
+              margin-bottom: 1.5vmin
           .description
             font-size: 2vmin
             font-weight: 500
+            @include mobile
+              font-size: 4.2vmin
         .row_r
           float: left
           width: 50%
@@ -479,6 +621,8 @@ main
             margin-left: 2%
             opacity: 0.6
             background: url(./assets/img/umbrella.svg) no-repeat center 0 / 63% auto
+            @include mobile
+              font-size: 3.6vmin
     .a_week_box
       float: left
       width: 91%
@@ -488,11 +632,13 @@ main
       @include mobile
         width: 100%
         overflow-x: auto
+        padding: 3vmin 4vmin 4vmin 4vmin
+        margin-top: 4vmin
       .a_week
         float: left
         width: 100%
         @include mobile
-          width: 160%
+          width: 166%
         .day_box
           float: left
           width: 14.2857142857%
@@ -502,24 +648,37 @@ main
           *
             float: left
             width: 100%
-          &:nth-child(even)
-            display: none
-          &:first-child
-            .date
-              &:after
-                content: ' (今)'
-                font-size: 13px
+          // &:nth-child(even)
+          //   display: none
+          // &:first-child
+          //   .date
+          //     &:after
+          //       content: ' (今)'
+          //       font-size: 13px
+          @include mobile
+            width: 12.2857142857%
+            padding: 4vmin 0
+            margin: 0 1%
           .date
             font-size: 2vmin
+            @include mobile
+              font-size: 4vmin
           .icon
             margin: 1vmin 0
+            @include mobile
+              margin: 2vmin 0
             img
               display: inline-block
               float: none
               width: 48%
+              @include mobile
+                width: 70%
           .temperature
             font-size: 1.8vmin
             &:after
               content: '°C'
+            @include mobile
+              font-size: 3.1vmin
+
 
 </style>
