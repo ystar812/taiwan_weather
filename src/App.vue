@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <main>
-      <div id="map_box">
+      <!-- 地圖 -->
+      <div id="map_box" :class="{show:showMap}">
         <div id="map">
           <div class="icon_box" v-for="(item, index) in mapData" :key="index" :id="`c${item.countyId}`" @mouseover="hoverEnter(index)" @mouseleave="hoverOut(index)" @click="changeCounty(index)" :style="item.coordinate" :class="{active:item.active, current: currentCounty == index}">
             <div v-if="allCounties" class="icon">
@@ -15,8 +16,12 @@
             </g>
           </svg>
         </div>
+        <div id="close_map_btn" @click="closeMap"></div>
       </div>
+      <div id="open_map_btn" @click="openMap">選擇縣市</div>
+      <!-- 當前縣市 -->
       <div id="weather_info">
+        <!-- 當前天氣 -->
         <div class="current">
           <div v-if="allCounties" class="info_box">
             <div class="top_box">
@@ -29,10 +34,10 @@
               </div>
             </div>
             <div class="bottom_box">
-              <div class="lable" :class="{text_shrink}">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
               <div v-if="Number(currentTemperature) > Number(allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName)" class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{currentTemperature}}</div>
               <div v-else-if="Number(currentTemperature) < Number(allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName)" class="temperature">{{currentTemperature}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
               <div v-else class="temperature">{{allCounties[currentCounty].weatherElement[2].time[0].parameter.parameterName}} - {{allCounties[currentCounty].weatherElement[4].time[0].parameter.parameterName}}</div>
+              <div class="lable" :class="{text_shrink}">{{allCounties[currentCounty].weatherElement[0].time[0].parameter.parameterName}}</div>
             </div>
           </div>
           <div class="description_box">
@@ -46,6 +51,7 @@
             </div>
           </div>
         </div>
+        <!-- 今明預報 -->
         <div v-if="allCounties" class="these_two_days">
           <div class="row">
             <div class="row_l">
@@ -87,6 +93,7 @@
             </div>
           </div>
         </div>
+        <!-- 一週預報 -->
         <div class="a_week_box">
           <div v-if="aWeekWeather" class="a_week">
             <div class="day_box" v-for="(item, index) in aWeekWx" :key="index">
@@ -118,7 +125,8 @@ export default {
       aWeekWeather: '',
       text_shrink: false,
       description: W50_County,
-      timeLabel: ''
+      timeLabel: '',
+      showMap: false
     }
   },
   async created(){
@@ -178,10 +186,14 @@ export default {
         this.allCounties = response.data.records.location;
         this.sortMapData();
         this.sortAllCounties();
-        if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1]  == '06:00:00') {
-          this.timeLabel = ['今晚明晨','明日白天','明日晚上']
+        if (this.allCounties[0].weatherElement[0].time[0].startTime.split(' ')[0] == this.allCounties[0].weatherElement[0].time[0].endTime.split(' ')[0] && this.allCounties[0].weatherElement[0].time[0].endTime.split(' ')[0] == this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[0] && this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[0] == this.allCounties[0].weatherElement[0].time[1].endTime.split(' ')[0]) {
+          this.timeLabel = ['今日凌晨','今日白天','今日晚上']
         }else{
-          this.timeLabel = ['今日白天','今晚明晨','明日白天']
+          if (this.allCounties[0].weatherElement[0].time[1].startTime.split(' ')[1] == '06:00:00') {
+            this.timeLabel = ['今晚明晨','明日白天','明日晚上']
+          }else{
+            this.timeLabel = ['今日白天','今晚明晨','明日白天']
+          }
         }
       });
     },
@@ -201,10 +213,14 @@ export default {
       });
     },
     hoverEnter(n){
-      this.mapData[n].active = true
+      if(window.innerWidth > 991){
+        this.mapData[n].active = true
+      }
     },
     hoverOut(n){
-      this.mapData[n].active = false
+      if(window.innerWidth > 991){
+        this.mapData[n].active = false
+      }
     },
     sortArray1(x, y){
       return x.place.localeCompare(y.place);
@@ -225,6 +241,14 @@ export default {
       this.currentCounty = v;
       this.getCounty();
       this.$refs.des.scroll(0, 0);
+      window.scrollTo(0,0);
+      this.showMap = false;
+    },
+    openMap(){
+      this.showMap = true;
+    },
+    closeMap(){
+      this.showMap = false;
     }
   },
   components:{
@@ -254,7 +278,6 @@ export default {
 
 $color_navy_blue: #004b7a
 $color_blue: #0080a2
-$color_light_blue: #2896af
 $color_sky_blue: #bce7f4
 $color_cream: #fdf7e4
 $color_white: #ffffff
@@ -311,19 +334,34 @@ main
   display: flex
   flex-wrap: wrap
   #map_box
+    position: relative
     display: flex
     flex: 0 0 40%
     justify-content: center
     align-items: center
     height: 100vh
     @include mobile
+      position: fixed
+      top: 0
+      left: 0
+      width: 100%
+      height: 100%
       flex: 0 0 100%
-      height: auto
-      padding: 11.5vw 15vw 11.5vw 8vw
+      padding: 11.5vw 15vw 11.5vw 6vw
+      opacity: 0
+      visibility: hidden
+      background-color: $color_sky_blue
+      z-index: 20
+      transition: .2s
+      &.show
+        opacity: 1
+        visibility: visible
     #map
       position: relative
       height: 80%
       margin: 10% 0 0 0
+      @include laptop
+        height: 83%
       @include mobile
         width: 100%
         height: auto
@@ -333,10 +371,16 @@ main
         text-align: center
         cursor: pointer
         transition: transform .2s
-        @include laptop
-          width: 45px
         &.active, &.current
           transform: scale(1.11)
+        @include laptop
+          width: 48px
+          &#c10018
+            top: 3% !important
+            left: 48% !important
+          &#c66
+            top: 19% !important
+            left: 34% !important
         @include phone
           &#c09020
             top: -12% !important
@@ -365,6 +409,9 @@ main
           &#c10018
             top: -2% !important
             left: 41% !important
+          &#c10004
+            top: 14% !important
+            left: 68% !important
           &#c10005
             top: 11% !important
             left: 41% !important
@@ -376,7 +423,7 @@ main
             left: 28% !important
           &#c10008
             top: 36% !important
-            left: 59% !important
+            left: 57% !important
           &#c10009
             top: 35% !important
             left: 13% !important
@@ -402,11 +449,9 @@ main
             top: 39% !important
             left: 90% !important
         .icon
-          float: left
-          width: 100%
-          line-height: 1
+          display: flex
+          justify-content: center
           img
-            display: inline-block
             width: 80%
         .place
           float: left
@@ -418,8 +463,6 @@ main
           transition: .2s
           @include laptop
             font-size: 12px
-          @include mobile
-            font-size: 11px
       svg
         height: 100%
         @include mobile
@@ -432,12 +475,35 @@ main
           transition: opacity .3s
           &.active, &.current
             opacity: 1
+    #close_map_btn
+      display: none
+      @include mobile
+        display: block
+        position: absolute
+        top: 14px
+        right: 14px
+        width: 88px
+        height: 30px
+        background: url(./assets/img/x.svg) no-repeat right center / auto 100%
+  #open_map_btn
+    display: none
+    @include mobile
+      display: block
+      position: fixed
+      top: 15px
+      right: 15px
+      font-size: 16px
+      padding: 5px 10px
+      border: 2px solid $color_blue
+      border-radius: 12px
+      background: $color_sky_blue
+      z-index: 10
   #weather_info
     flex: 0 0 60%
     padding: 5vmin 6vmin
     @include mobile
       flex: 0 0 100%
-      padding: 0 6vmin 6vmin 6vmin
+      padding: 13vmin 6vmin 8vmin 6vmin
     .current
       float: left
       width: 52%
@@ -455,6 +521,8 @@ main
           .text_box
             float: left
             margin-right: 3vmin
+            @include mobile
+              margin-right: 5vmin
             .place
               color: $color_navy_blue
               font-size: 7vmin
@@ -468,23 +536,21 @@ main
               &:after
                 content: '°c'
               @include mobile
-                font-size: 17vmin
+                font-size: 16.9vmin
           .icon
             float: left
-            padding-top: 2vmin
-            @include mobile
-              padding-top: 1vmin
+            padding-top: 1vmin
             img
-              width: 18vmin
+              width: 20vmin
               @include mobile
                 width: 32vmin
         .bottom_box
           float: left
           width: 100%
-          .lable
+          .temperature
             float: left
             color: $color_white
-            min-width: 23.5vmin
+            min-width: 21.6vmin
             height: 6vmin
             font-size: 2.8vmin
             line-height: 6vmin
@@ -492,29 +558,29 @@ main
             padding: 0 2vmin
             margin-right: 1.2vmin
             background: url(./assets/img/bg1.png) no-repeat center / 100% 100%
+            &:after
+              content: '°C'
             &.text_shrink
               font-size: 2.2vmin
             @include mobile
-              font-size: 5.6vmin
-              min-width: 38vmin
+              font-size: 5vmin
+              min-width: 35vmin
               height: 10vmin
               line-height: 11vmin
               margin-right: 2vmin
-          .temperature
+          .lable
             float: left
             color: $color_blue
-            min-width: 16.8vmin
+            min-width: 23vmin
             height: 6vmin
-            font-size: 2.8vmin
+            font-size: 2.6vmin
             line-height: 6vmin
             font-weight: 600
             text-align: center
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
-            &:after
-              content: '°C'
             @include mobile
-              font-size: 5vmin
-              min-width: 33vmin
+              font-size: 4.6vmin
+              min-width: 41vmin
               height: 10vmin
               line-height: 11vmin
       .description_box
