@@ -140,7 +140,7 @@ export default {
     aWeekWx(){
       if (this.aWeekWeather) {
         return this.aWeekWeather[0].time.filter(item =>{
-          return item.startTime.split(' ')[1] == '06:00:00'
+          return item.startTime.split(' ')[0] == item.endTime.split(' ')[0]
         })
       }else{
         return []
@@ -149,7 +149,7 @@ export default {
     aWeekMinT(){
       if (this.aWeekWeather) {
         return this.aWeekWeather[1].time.filter(item =>{
-          return item.startTime.split(' ')[1] == '06:00:00'
+          return item.startTime.split(' ')[0] == item.endTime.split(' ')[0]
         })
         // let newMinT = this.aWeekWeather[1].time.filter(item =>{
         //   return item.startTime.split(' ')[1] == '06:00:00'
@@ -167,7 +167,7 @@ export default {
     aWeekMaxT(){
       if (this.aWeekWeather) {
         return this.aWeekWeather[2].time.filter(item =>{
-          return item.startTime.split(' ')[1] == '06:00:00'
+          return item.startTime.split(' ')[0] == item.endTime.split(' ')[0]
         })
       }else{
         return []
@@ -500,7 +500,7 @@ main
       z-index: 10
   #weather_info
     flex: 0 0 60%
-    padding: 5vmin 6vmin
+    padding: 5vmin 6vmin 5vmin 4vmin
     @include mobile
       flex: 0 0 100%
       padding: 13vmin 6vmin 8vmin 6vmin
@@ -714,13 +714,8 @@ main
           *
             float: left
             width: 100%
-          // &:nth-child(even)
-          //   display: none
-          // &:first-child
-          //   .date
-          //     &:after
-          //       content: ' (今)'
-          //       font-size: 13px
+          &:nth-child(8)
+            display: none
           @include mobile
             width: 12.2857142857%
             padding: 4vmin 0
