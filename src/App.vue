@@ -513,8 +513,10 @@ main
         float: left
         width: 100%
         padding: 0 0 2.1vmin 6vmin
+        @include laptop
+          padding: 0 0 2.1vmin 4vmin
         @include mobile
-          padding: 0 0 4vmin 7vmin
+          padding: 0 0 4vmin 6vmin
         .top_box
           float: left
           width: 100%
@@ -572,11 +574,15 @@ main
             float: left
             color: $color_blue
             min-width: 23vmin
+            max-width: 25vmin
             height: 6vmin
             font-size: 2.6vmin
             line-height: 6vmin
             font-weight: 600
             text-align: center
+            overflow: hidden
+            white-space: nowrap
+            text-overflow: ellipsis
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
             @include mobile
               font-size: 4.6vmin
