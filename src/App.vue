@@ -264,6 +264,10 @@ export default {
   @media(min-width: 992px)
     @content
 
+@mixin desktop_1700
+  @media(max-width: 1700px)
+    @content
+
 @mixin laptop
   @media(max-width: 1400px)
     @content
@@ -332,7 +336,6 @@ a
 
 main
   display: flex
-  flex-wrap: wrap
   #map_box
     position: relative
     display: flex
@@ -522,18 +525,18 @@ main
           width: 100%
           .text_box
             float: left
-            margin-right: 3vmin
+            margin-right: 1.9vw
             @include mobile
               margin-right: 5vmin
             .place
               color: $color_navy_blue
-              font-size: 7vmin
+              font-size: 3.42vw
               font-weight: 500
               @include mobile
                 font-size: 11.7vmin
             .temperature
               color: $color_blue
-              font-size: 10vmin
+              font-size: 4.9vw
               font-weight: 600
               &:after
                 content: '°c'
@@ -543,7 +546,7 @@ main
             float: left
             padding-top: 1vmin
             img
-              width: 20vmin
+              width: 9.9vw
               @include mobile
                 width: 32vmin
         .bottom_box
@@ -552,13 +555,13 @@ main
           .temperature
             float: left
             color: $color_white
-            min-width: 21.6vmin
+            width: 10.5vw
             height: 6vmin
-            font-size: 2.8vmin
+            font-size: 1.36vw
             line-height: 6vmin
             text-align: center
             padding: 0 2vmin
-            margin-right: 1.2vmin
+            margin-right: 0.8vw
             background: url(./assets/img/bg1.png) no-repeat center / 100% 100%
             &:after
               content: '°C'
@@ -566,17 +569,16 @@ main
               font-size: 2.2vmin
             @include mobile
               font-size: 5vmin
-              min-width: 35vmin
+              width: 35vmin
               height: 10vmin
               line-height: 11vmin
               margin-right: 2vmin
           .lable
             float: left
             color: $color_blue
-            min-width: 23vmin
-            max-width: 25vmin
+            width: 11.6vw
             height: 6vmin
-            font-size: 2.6vmin
+            font-size: 1.26vw
             line-height: 6vmin
             font-weight: 600
             text-align: center
@@ -586,7 +588,7 @@ main
             background: url(./assets/img/bg2.png) no-repeat center / 100% 100%
             @include mobile
               font-size: 4.6vmin
-              min-width: 41vmin
+              width: 41vmin
               height: 10vmin
               line-height: 11vmin
       .description_box
@@ -629,11 +631,13 @@ main
     .these_two_days
       float: left
       width: 36%
+      min-height: 50vmin
       padding: 5vmin 4vmin 4vmin 4vmin
-      margin: 17vmin 0 0 3%
+      margin: 15vmin 0 0 3%
       background: url(./assets/img/bg3.png) no-repeat center / 100% 100%
       @include mobile
         width: 100%
+        min-height: 0
         padding: 8vmin 8vmin 6vmin 8vmin
         margin: 4vmin 0 0 0
       .row
