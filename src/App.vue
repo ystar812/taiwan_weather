@@ -94,7 +94,7 @@
           </div>
         </div>
         <!-- 一週預報 -->
-        <div class="a_week_box">
+        <div class="a_week_box" ref="a_week">
           <div v-if="aWeekWeather" class="a_week">
             <div class="day_box" v-for="(item, index) in aWeekWx" :key="index">
               <div class="date">{{item.startTime.split(' ')[0].split('-')[1]}}/{{item.startTime.split(' ')[0].split('-')[2]}}</div>
@@ -241,6 +241,7 @@ export default {
       this.currentCounty = v;
       this.getCounty();
       this.$refs.des.scroll(0, 0);
+      this.$refs.a_week.scroll(0, 0);
       window.scrollTo(0,0);
       this.showMap = false;
     },
