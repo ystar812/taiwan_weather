@@ -179,7 +179,7 @@ export default {
   },
   methods:{
     async getAllCounties(){
-      // 中央氣象局API 預報-一般天氣預報(/v1/rest/datastore/F-C0032-001 一般天氣預報-今明 36 小時天氣預報)
+      // 中央氣象局API 預報 - 一般天氣預報(/v1/rest/datastore/F-C0032-001 一般天氣預報-今明 36 小時天氣預報)
       var apiUrl = 'https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7';
       await this.$http.get(apiUrl).then((response) => {
         // console.log(response.data.records);
@@ -198,11 +198,11 @@ export default {
       });
     },
     getCurrentWeather(county){
-      // 中央氣象局API 觀測-現在天氣觀測報告(/v1/rest/datastore/O-A0003-001 局屬氣象站-現在天氣觀測報告)
+      // 中央氣象局API 觀測 - 現在天氣觀測報告(/v1/rest/datastore/O-A0003-001 局屬氣象站-現在天氣觀測報告)
       return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/O-A0003-001?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&locationName=${county}&elementName=TEMP&parameterName=CITY`);
     },
     getAweekWeather(id,town){
-      // 中央氣象局API 預報-1週天氣預報(/v1/rest/datastore/F-D0047-xxx)
+      // 中央氣象局API 預報 - 1週天氣預報(/v1/rest/datastore/F-D0047-xxx)
       return this.$http.get(`https://opendata.cwb.gov.tw/api/v1/rest/datastore/F-D0047-${id}?Authorization=CWB-3C06B79E-E9B7-48A9-8F8C-BD4FEF915DD7&locationName=${town}&elementName=Wx,MinT,MaxT`);
     },
     getCounty(){
