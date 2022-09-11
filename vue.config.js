@@ -4,5 +4,6 @@ module.exports = {
     externals: {
       countyData: 'W50_County'
     }
-  }
+  },
+  productionSourceMap: false
 }

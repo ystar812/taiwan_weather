@@ -317,10 +317,13 @@ body
   background-color: $color_sky_blue
 
 *
-  &:after, &:before
   -webkit-box-sizing: border-box
   -moz-box-sizing: border-box
   box-sizing: border-box
+  &:after, &:before
+    -webkit-box-sizing: border-box
+    -moz-box-sizing: border-box
+    box-sizing: border-box
 
 a
   color: $color_blue
