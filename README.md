@@ -1,24 +1,6 @@
-# taiwan_weather
+# Taiwan Weather
 
-## Project setup
-```
-npm install
-```
+Taiwan Weather 是一款提供查詢台灣天氣狀況的應用程序  
+線上DEMO : [https://yyystar.com/demo/taiwan_weather/](https://yyystar.com/demo/taiwan_weather/)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+![](https://yyystar.com/for_github/img/p02_ms.jpg)
